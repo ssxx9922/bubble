@@ -61,11 +61,11 @@ def interact(request):
 
 
 def crawler(request):
-    try:
-        crawlerBshijie()
-        crawlerJinse()
-    except:
-        return JsonResponse({'error':'爬取失败'})
+    # try:
+    crawlerBshijie()
+    crawlerJinse()
+    # except:
+    #     return JsonResponse({'error':'爬取失败'})
 
     return JsonResponse({'code':'OK'})
 
@@ -78,7 +78,7 @@ def crawlerBshijie():
         info = r['content']
         infoid = r['newsflash_id']
         infotime = datetime.fromtimestamp(r['issue_time'])
-        saveObj(info, infoid, infotime)
+        saveObj(info, infoid, infotime,'http://www.bishijie.com/api/news')
 
 def crawlerJinse():
     response = requests.get('http://www.jinse.com/lives')
@@ -90,10 +90,10 @@ def crawlerJinse():
         time = r.find('p', class_='live-time').get_text().strip() + ':00'
         infotime = date + time
         info = r.find('div', class_='live-info').get_text().strip()
-        saveObj(info,infoid,infotime)
+        saveObj(info,infoid,infotime,'http://www.jinse.com/live')
 
 
-def saveObj(info,infoid,infotime):
+def saveObj(info,infoid,infotime,author):
     list = models.information.objects.filter(infoid=infoid)
     if list.count() == 0:
-        models.information.objects.create(info=info, infoid=infoid, infotime=infotime)
+        models.information.objects.create(info=info, infoid=infoid, infotime=infotime, author=author)
