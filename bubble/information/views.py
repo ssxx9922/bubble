@@ -6,6 +6,8 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render
 from django.http import JsonResponse
 
+from apscheduler.schedulers.background import BackgroundScheduler
+
 from . import models
 # Create your views here.
 
@@ -59,13 +61,12 @@ def interact(request):
     else:
         return JsonResponse({'error':'数据错误'})
 
-
 def crawler(request):
-    # try:
-    crawlerBshijie()
-    crawlerJinse()
-    # except:
-    #     return JsonResponse({'error':'爬取失败'})
+    try:
+        crawlerBshijie()
+        crawlerJinse()
+    except:
+        return JsonResponse({'error':'爬取失败'})
 
     return JsonResponse({'code':'OK'})
 
@@ -97,3 +98,16 @@ def saveObj(info,infoid,infotime,author):
     list = models.information.objects.filter(infoid=infoid)
     if list.count() == 0:
         models.information.objects.create(info=info, infoid=infoid, infotime=infotime, author=author)
+
+
+sched = BackgroundScheduler()
+
+@sched.scheduled_job('interval',seconds=600,id='job')
+def autoCrawler():
+    try:
+        crawlerBshijie()
+        crawlerJinse()
+    except:
+        print('爬取失败')
+
+sched.start()
