@@ -66,6 +66,7 @@ def crawler(request):
     try:
         crawlerBshijie()
         crawlerJinse()
+        crawlerWallstreetcn()
     except:
         return JsonResponse({'error':'爬取失败'})
 
@@ -80,7 +81,7 @@ def crawlerBshijie():
             info = r['content']
             infoid = r['newsflash_id']
             infotime = datetime.fromtimestamp(r['issue_time'])
-            saveObj(info, infoid, infotime,'http://www.bishijie.com/api/news')
+            saveObj(info, infoid, infotime,'bishijie')
 
 def crawlerJinse():
     response = requests.get('http://www.jinse.com/lives')
@@ -92,8 +93,16 @@ def crawlerJinse():
         time = r.find('p', class_='live-time').get_text().strip() + ':00'
         infotime = date + time
         info = r.find('div', class_='live-info').get_text().strip()
-        saveObj(info,infoid,infotime,'http://www.jinse.com/live')
+        saveObj(info,infoid,infotime,'jinse')
 
+def crawlerWallstreetcn():
+    response = requests.get('http://api-prod.wallstreetcn.com/apiv1/content/lives/pc?limit=20')
+    result = json.loads(response.text)
+    for item in result['data']['blockchain']['items']:
+        infoid = str(item['id'])
+        infotime = datetime.fromtimestamp(item['display_time'])
+        info = item['content_text'].strip()
+        saveObj(info,infoid,infotime,'wallstreetcn')
 
 def saveObj(info,infoid,infotime,author):
     list = models.information.objects.filter(infoid=infoid)
@@ -103,7 +112,7 @@ def saveObj(info,infoid,infotime,author):
 
 sched = BackgroundScheduler()
 
-@sched.scheduled_job('interval',seconds=600,id='job')
+@sched.scheduled_job('interval',seconds=630,id='job')
 def autoCrawler():
     try:
         crawlerBshijie()
@@ -114,5 +123,10 @@ def autoCrawler():
         crawlerJinse()
     except:
         send_mail('爬取失败', '金色财经爬虫出现问题', 'ssxx9922@163.com', ['andy.shi@foxmail.com'], fail_silently=False)
+
+    try:
+        crawlerWallstreetcn()
+    except:
+        send_mail('爬取失败', '华尔街见闻爬虫出现问题', 'ssxx9922@163.com', ['andy.shi@foxmail.com'], fail_silently=False)
 
 sched.start()
