@@ -6,6 +6,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render
 from django.http import JsonResponse
 
+from django.core.mail import send_mail
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from . import models
@@ -73,13 +74,13 @@ def crawler(request):
 def crawlerBshijie():
     response = requests.get('http://www.bishijie.com/api/news')
     result = json.loads(response.text)
-    date = datetime.now().strftime('%Y-%m-%d')
-    list = result['data'][date]['buttom']
-    for r in list:
-        info = r['content']
-        infoid = r['newsflash_id']
-        infotime = datetime.fromtimestamp(r['issue_time'])
-        saveObj(info, infoid, infotime,'http://www.bishijie.com/api/news')
+    for date in dict(result['data']).keys():
+        list = result['data'][date]['buttom']
+        for r in list:
+            info = r['content']
+            infoid = r['newsflash_id']
+            infotime = datetime.fromtimestamp(r['issue_time'])
+            saveObj(info, infoid, infotime,'http://www.bishijie.com/api/news')
 
 def crawlerJinse():
     response = requests.get('http://www.jinse.com/lives')
@@ -106,8 +107,12 @@ sched = BackgroundScheduler()
 def autoCrawler():
     try:
         crawlerBshijie()
+    except:
+        send_mail('爬取失败', '币世界爬虫出现问题', 'ssxx9922@163.com', ['andy.shi@foxmail.com'], fail_silently=False)
+
+    try:
         crawlerJinse()
     except:
-        print('爬取失败')
+        send_mail('爬取失败', '金色财经爬虫出现问题', 'ssxx9922@163.com', ['andy.shi@foxmail.com'], fail_silently=False)
 
 sched.start()
