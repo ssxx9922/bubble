@@ -14,7 +14,7 @@ from . import models
 
 
 def list(request):
-    list = models.information.objects.values('info', 'infotime', 'infoid', 'favour', 'disfavor').order_by('-infotime')
+    list = models.information.objects.values('info', 'author', 'infotime', 'id', 'favour', 'disfavor').order_by('-infotime')
     info_list = Paginator(list, 20)
 
     page = request.GET.get('page')
@@ -31,10 +31,11 @@ def list(request):
     dict_list = []
 
     for item in contacts:
-        dict_list.append({'id':item['infoid'],
+        dict_list.append({'id':item['id'],
                           'text':item['info'],
                           'favour':item['favour'],
                           'disfavor':item['disfavor'],
+                          'author': item['author'],
                           'time':item['infotime'].strftime('%Y-%m-%d %H:%M:%S')})
 
     return JsonResponse({'code':'OK',
