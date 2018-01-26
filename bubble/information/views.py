@@ -2,6 +2,7 @@ import json
 from bs4 import BeautifulSoup as bs
 import requests
 from datetime import datetime
+import time
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -50,7 +51,7 @@ def interact(request):
     if id is None or type is None:
         return JsonResponse({'error':'参数错误'})
 
-    obj = models.information.objects.filter(infoid=id)
+    obj = models.information.objects.filter(id=id)
     if obj.count() == 0:
         return JsonResponse({'error':'ID错误'})
 
@@ -90,11 +91,25 @@ def crawlerJinse():
     date_id = bs(response.text, 'lxml').find('ul', class_='lost').get('id')
     date = datetime.now().strftime('%Y-%m-%d ')
     for r in result:
-        infoid = date_id + '-' + r.get('data-id').strip()
+        infoid = date_id[5:] + '-' + r.get('data-id').strip()
         time = r.find('p', class_='live-time').get_text().strip() + ':00'
         infotime = date + time
+        infotime = afterInfoTime(infotime)
+        print(infotime)
         info = r.find('div', class_='live-info').get_text().strip()
         saveObj(info,infoid,infotime,'jinse')
+
+def afterInfoTime(infotime):
+    cur_time = time.mktime(datetime.now().timetuple())
+
+    per_infotime = datetime.strptime(infotime, '%Y-%m-%d %H:%S:%M')
+    per_time = time.mktime(per_infotime.timetuple())
+
+    if cur_time - per_time < 0:
+        infotime = datetime.fromtimestamp(int(per_time-3600*24))
+
+    return infotime
+
 
 def crawlerWallstreetcn():
     response = requests.get('http://api-prod.wallstreetcn.com/apiv1/content/lives/pc?limit=20')
