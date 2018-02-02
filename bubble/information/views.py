@@ -95,7 +95,6 @@ def crawlerJinse():
         time = r.find('p', class_='live-time').get_text().strip() + ':00'
         infotime = date + time
         infotime = afterInfoTime(infotime)
-        print(infotime)
         info = r.find('div', class_='live-info').get_text().strip()
         saveObj(info,infoid,infotime,'jinse')
 
