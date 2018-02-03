@@ -69,8 +69,9 @@ def crawler(request):
         crawlerBshijie()
         crawlerJinse()
         crawlerWallstreetcn()
-    except:
-        return JsonResponse({'error':'爬取失败'})
+        crawlerBiknow()
+    except Exception as e:
+        return JsonResponse({'error':e})
 
     return JsonResponse({'code':'OK'})
 
@@ -81,7 +82,7 @@ def crawlerBshijie():
         list = result['data'][date]['buttom']
         for r in list:
             info = r['content']
-            infoid = r['newsflash_id']
+            infoid = 'BSJ-' + str(r['newsflash_id'])
             infotime = datetime.fromtimestamp(r['issue_time'])
             saveObj(info, infoid, infotime,'bishijie')
 
@@ -119,6 +120,20 @@ def crawlerWallstreetcn():
         info = item['content_text'].strip()
         saveObj(info,infoid,infotime,'wallstreetcn')
 
+def crawlerBiknow():
+    response = requests.get('http://www.biknow.com')
+    response.encoding = 'utf-8'
+    result = bs(response.text, 'lxml').find('ul', id='jiazai')
+    date = datetime.now().strftime('%Y-%m-%d ')
+    for item in result.find_all('li'):
+        infoid = 'BZD-' + item.find('p', class_='kuaixunconr').find('a').get('href')[17:]
+        time = item.find('p', class_='kuaixunconl').get_text().strip() + ':00'
+        infotime = date + time
+        infotime = afterInfoTime(infotime)
+        info = item.find('p', class_='kuaixunconr').find('a').get_text().strip()
+        saveObj(info, infoid, infotime, 'biknow')
+
+
 def saveObj(info,infoid,infotime,author):
     list = models.information.objects.filter(infoid=infoid)
     if list.count() == 0:
@@ -143,5 +158,10 @@ def autoCrawler():
         crawlerWallstreetcn()
     except:
         send_mail('爬取失败', '华尔街见闻爬虫出现问题', 'ssxx9922@163.com', ['andy.shi@foxmail.com'], fail_silently=False)
+
+    try:
+        crawlerBiknow()
+    except:
+        send_mail('爬取失败', '币知道爬虫出现问题', 'ssxx9922@163.com', ['andy.shi@foxmail.com'], fail_silently=False)
 
 sched.start()
