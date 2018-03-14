@@ -1,9 +1,8 @@
 from django.urls import path
-
-from . import views
+from information.views import ListView,InteractView,CrawlerView
 
 urlpatterns = [
-    path('list', views.list),
-    path('touch', views.interact),
-    path('crawler', views.crawler)
+    path('list', ListView.as_view()),
+    path('touch', InteractView.as_view()),
+    path('crawler', CrawlerView.as_view())
 ]

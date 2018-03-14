@@ -4,76 +4,78 @@ import requests
 from datetime import datetime
 import time
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.shortcuts import render
 from django.http import JsonResponse
 
 from django.core.mail import send_mail
 from apscheduler.schedulers.background import BackgroundScheduler
+from django.views import View
 
 from . import models
 # Create your views here.
 
 
-def list(request):
-    list = models.information.objects.values('info', 'author', 'infotime', 'id', 'favour', 'disfavor').order_by('-infotime')
-    info_list = Paginator(list, 20)
+class ListView(View):
+    def get(self,request):
+        list = models.information.objects.values('info', 'author', 'infotime', 'id', 'favour', 'disfavor').order_by('-infotime')
+        info_list = Paginator(list, 20)
 
-    page = request.GET.get('page')
+        page = request.GET.get('page')
 
-    page = page if page is not None else 1
+        page = page if page is not None else 1
 
-    try:
-        contacts = info_list.page(page)
-    except PageNotAnInteger:
-        return JsonResponse({'error':'服务器出了问题'})
-    except EmptyPage:
-        return JsonResponse({'error':'没用更多数据了'})
+        try:
+            contacts = info_list.page(page)
+        except PageNotAnInteger:
+            return JsonResponse({'error':'服务器出了问题'})
+        except EmptyPage:
+            return JsonResponse({'error':'没用更多数据了'})
 
-    dict_list = []
+        dict_list = []
 
-    for item in contacts:
-        dict_list.append({'id':item['id'],
-                          'text':item['info'],
-                          'favour':item['favour'],
-                          'disfavor':item['disfavor'],
-                          'author': item['author'],
-                          'time':item['infotime'].strftime('%Y-%m-%d %H:%M:%S')})
+        for item in contacts:
+            dict_list.append({'id':item['id'],
+                              'text':item['info'],
+                              'favour':item['favour'],
+                              'disfavor':item['disfavor'],
+                              'author': item['author'],
+                              'time':item['infotime'].strftime('%Y-%m-%d %H:%M:%S')})
 
-    return JsonResponse({'code':'OK',
-                         'data':{'page':info_list.num_pages,
-                                 'list':dict_list}})
+        return JsonResponse({'code':'OK',
+                             'data':{'page':info_list.num_pages,
+                                     'list':dict_list}})
 
-def interact(request):
+class InteractView(View):
+    def get(self,request):
+        id = request.GET.get('id')
+        type = request.GET.get('type')
 
-    id = request.GET.get('id')
-    type = request.GET.get('type')
+        if id is None or type is None:
+            return JsonResponse({'error':'参数错误'})
 
-    if id is None or type is None:
-        return JsonResponse({'error':'参数错误'})
+        obj = models.information.objects.filter(id=id)
+        if obj.count() == 0:
+            return JsonResponse({'error':'ID错误'})
 
-    obj = models.information.objects.filter(id=id)
-    if obj.count() == 0:
-        return JsonResponse({'error':'ID错误'})
+        if type == 'favour':
+            obj.update(favour=obj.first().favour + 1)
+            return JsonResponse({'code': 'OK'})
+        elif type == 'disfavor':
+            obj.update(disfavor=obj.first().disfavor + 1)
+            return JsonResponse({'code': 'OK'})
+        else:
+            return JsonResponse({'error':'数据错误'})
 
-    if type == 'favour':
-        obj.update(favour=obj.first().favour + 1)
-        return JsonResponse({'code': 'OK'})
-    elif type == 'disfavor':
-        obj.update(disfavor=obj.first().disfavor + 1)
-        return JsonResponse({'code': 'OK'})
-    else:
-        return JsonResponse({'error':'数据错误'})
+class CrawlerView(View):
+    def get(self,request):
+        try:
+            crawlerBshijie()
+            crawlerJinse()
+            crawlerWallstreetcn()
+            crawlerBiknow()
+        except Exception as e:
+            return JsonResponse({'error':e})
 
-def crawler(request):
-    try:
-        crawlerBshijie()
-        crawlerJinse()
-        crawlerWallstreetcn()
-        crawlerBiknow()
-    except Exception as e:
-        return JsonResponse({'error':e})
-
-    return JsonResponse({'code':'OK'})
+        return JsonResponse({'code':'OK'})
 
 def crawlerBshijie():
     response = requests.get('http://www.bishijie.com/api/news')
@@ -87,7 +89,8 @@ def crawlerBshijie():
             saveObj(info, infoid, infotime,'bishijie')
 
 def crawlerJinse():
-    response = requests.get('http://www.jinse.com/lives')
+    headers={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}
+    response = requests.get('http://www.jinse.com/lives',headers=headers)
     result = bs(response.text, 'lxml').find_all('li', class_='clearfix ')
     date_id = bs(response.text, 'lxml').find('ul', class_='lost').get('id')
     date = datetime.now().strftime('%Y-%m-%d ')
@@ -137,7 +140,7 @@ def crawlerBiknow():
 def saveObj(info,infoid,infotime,author):
     list = models.information.objects.filter(infoid=infoid)
     if list.count() == 0:
-        models.information.objects.create(info=info, infoid=infoid, infotime=infotime, author=author)
+        models.information.objects.create(info=info.strip(), infoid=infoid, infotime=infotime, author=author)
 
 
 sched = BackgroundScheduler()
