@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crontab',
     'information',
+    'crawler',
     'wechatmp'
 ]
 
@@ -138,3 +140,9 @@ EMAIL_PORT = 465
 EMAIL_HOST_USER = 'ssxx9922@163.com' # 帐号
 EMAIL_HOST_PASSWORD = 'sxYL19920316'  # 密码
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# 定时任务
+CRONJOBS = [
+    ('*/12 * * * *', 'bubble.crawler.views.clawler'),
+    ('30 08 * * *', 'bubble.crawler.views.report')
+]
