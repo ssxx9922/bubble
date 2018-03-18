@@ -6,14 +6,14 @@ import requests
 from django.http import JsonResponse
 from bs4 import BeautifulSoup as bs
 from django.views import View
-from information.models import information
+from information.models import information,coin
 from crawler.models import crawlState
+from lxml import etree
 
-
-class CrawlerView(View):
+class CrawlerInfoView(View):
     def get(self,request):
         try:
-            crawlObj = crawl()
+            crawlObj = crawlInfo()
             crawlObj.crawlerBshijie()
             crawlObj.crawlerJinse()
             crawlObj.crawlerWallstreetcn()
@@ -23,22 +23,35 @@ class CrawlerView(View):
         else:
             return JsonResponse({'code': 'OK'})
 
+class CrawlerCoinView(View):
+    def get(self,request):
+        try:
+            crawlObj = crawlMarket()
+            crawlObj.crawlerFeixiaohao()
+        except Exception as e:
+            return JsonResponse({'error':e})
+        else:
+            return JsonResponse({'code':'OK'})
 
 
 class baseCrawl(object):
-    def crawlState(self,name,isSuccess,note):
+    def crawlState(self,name,isSuccess,note,time):
         state = 'success'if isSuccess == True else 'success'
-        crawlState.objects.create(target=name, state=state, note=note)
+        crawlState.objects.create(target=name, state=state, note=note, completetime=time)
 
     def getData(self,url):
         try:
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}
-            response = requests.get(url, headers=headers)
-            print('Getting result', url, response.status_code)
+            start = time.clock()
+            response = requests.get(url, headers=headers,timeout=10)
+            end = time.clock()
             if response.status_code == 200:
-                self.crawlState(url, True, str(response.status_code))
+                self.crawlState(url, True, str(response.status_code), '%f' %(end - start))
                 return response
+            else:
+                self.crawlState(url, False, str(response.status_code),'')
+                return None
         except Exception as e:
             print('Crawling Failed', url)
             self.crawlState(url,False,e)
@@ -55,7 +68,7 @@ class baseCrawl(object):
         return infotime
 
 
-class crawl(baseCrawl):
+class crawlInfo(baseCrawl):
     def crawlerBshijie(self):
         response = self.getData('http://www.bishijie.com/api/news')
         result = json.loads(response.text)
@@ -106,5 +119,27 @@ class crawl(baseCrawl):
         else:
             information.objects.create(info=info, infoid=infoid, infotime=infotime, author=author)
 
+
+class crawlMarket(baseCrawl):
+    def crawlerFeixiaohao(self):
+        response = self.getData('http://www.feixiaohao.com/#USD')
+
+        html = etree.HTML(response.text)
+        tbody = html.xpath('//*[@id="table"]/tbody/tr')
+        for item in tbody:
+            id = item.xpath('@id')[0]
+            image = item.xpath('td[2]/a/img/@src')[0]
+            name = item.xpath('td[2]/a/img/@alt')[0]
+            marketValue = item.xpath('td[3]/text()')[0]
+            price = item.xpath('td[4]/a/text()')[0]
+            circulation = item.xpath('td[5]/text()')[0]
+            self.saveObj(id,image,name,marketValue,price,circulation,'FXH')
+
+
+    def saveObj(self,id,image,name,marketValue,price,circulation,crawlFrom):
+        coin.objects.create(coinId=id, image=image, name=name, marketValue=marketValue, price=price,
+                            circulation=circulation,crawlfrom=crawlFrom)
+
+# https://block.cc/api/v1/coin/list?page=0&size=100win
 
 

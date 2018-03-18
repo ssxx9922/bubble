@@ -143,6 +143,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # 定时任务
 CRONJOBS = [
-    ('*/12 * * * *', 'crawler.jobs.crawlJob'),
+    ('*/12 * * * *', 'crawler.jobs.crawlInfoJob'),
+    ('*/5 * * * *', 'crawler.jobs.crawlCoinJob'),
     ('30 08 * * * *', 'crawler.jobs.reportJob')
 ]

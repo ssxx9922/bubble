@@ -3,7 +3,7 @@ from django.http import JsonResponse
 
 from django.views import View
 
-from information.models import information
+from information.models import information,coin
 # Create your views here.
 
 
@@ -31,7 +31,7 @@ class ListView(View):
                               'favour':item['favour'],
                               'disfavor':item['disfavor'],
                               'author': item['author'],
-                              'time':item['infotime'].strftime('%Y-%m-%d %H:%M:%S')})
+                              'time':item['infotime'].strftime('%Y-%m-%d %H:%M')})
 
         return JsonResponse({'code':'OK',
                              'data':{'page':info_list.num_pages,
@@ -58,3 +58,34 @@ class InteractView(View):
         else:
             return JsonResponse({'error':'数据错误'})
 
+class coinOnly(View):
+    def get(self,request):
+        pass
+        #TODO
+        # coinId = request.GET.get('coinId')
+        #
+        # if coin.objects.filter(coinId=coinId):
+        #     list = coin.objects.filter(coinId=coinId).order_by('-crawltime')
+        #
+        #     objs = Paginator(list, 1)
+        #     print(objs)
+        #     print(type(objs))
+        #
+        #     dict = {}
+        #     for obj in objs:
+        #         dict = {'id': obj['coinId'],
+        #                 'image': obj['image'],
+        #                 'name': obj['name'],
+        #                 'marketValue': obj['marketValue'],
+        #                 'price': obj['price'],
+        #                 'circulation': obj['circulation'],
+        #                 'crawlfrom': obj['crawlfrom']}
+        #
+        #     return JsonResponse({'code': 'OK',
+        #                          'data': {'item': dict}})
+        # else:
+        #     return JsonResponse({'error': 'ID错误'})
+
+class coinList(View):
+    def get(self,request):
+        pass

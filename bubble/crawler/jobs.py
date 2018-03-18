@@ -4,17 +4,20 @@ __date__ = '2018/3/16 PM3:39'
 
 import time
 from datetime import datetime
-from crawler.views import crawl
+from crawler.views import crawlInfo, crawlMarket
 from crawler.models import crawlState
 from django.core.mail import send_mail
 
-def crawlJob():
-    print('1')
-    crawlObj = crawl()
+def crawlInfoJob():
+    crawlObj = crawlInfo()
     crawlObj.crawlerBshijie()
     crawlObj.crawlerJinse()
     crawlObj.crawlerWallstreetcn()
     crawlObj.crawlerBiknow()
+
+def crawlCoinJob():
+    crawlObj = crawlMarket()
+    crawlObj.crawlerFeixiaohao()
 
 
 def reportJob():
@@ -34,5 +37,3 @@ def reportJob():
     mailData = '总数:{all}\n成功数:{succ}\n失败数:{fail}'.format(all=len(successList),succ=lenSuccess,fail=lenFailure)
 
     send_mail('爬取信息', mailData, 'ssxx9922@163.com', ['andy.shi@foxmail.com'], fail_silently=False)
-
-    print('2')
