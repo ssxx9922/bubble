@@ -9,7 +9,7 @@ class crawlState(models.Model):
     state = models.CharField(choices=(('success','成功'),('failure','失败'),('default','默认')),default='default',max_length=10,verbose_name='状态')
     note = models.TextField(verbose_name='备注',default='')
     crawltime = models.DateTimeField(default=datetime.now, verbose_name='爬取时间')
-    completetime = models.CharField(max_length=20,verbose_name='爬取用时')
+    completetime = models.CharField(max_length=20,verbose_name='爬取用时',default='')
 
     def __str__(self):
         return self.target

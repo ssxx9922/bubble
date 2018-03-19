@@ -122,13 +122,13 @@ class crawlInfo(baseCrawl):
 
 class crawlMarket(baseCrawl):
     def crawlerFeixiaohao(self):
-        response = self.getData('http://www.feixiaohao.com/#USD')
+        response = self.getData('http://www.feixiaohao.com')
 
         html = etree.HTML(response.text)
         tbody = html.xpath('//*[@id="table"]/tbody/tr')
         for item in tbody:
             id = item.xpath('@id')[0]
-            image = item.xpath('td[2]/a/img/@src')[0]
+            image = 'http:' + item.xpath('td[2]/a/img/@src')[0]
             name = item.xpath('td[2]/a/img/@alt')[0]
             marketValue = item.xpath('td[3]/text()')[0]
             price = item.xpath('td[4]/a/text()')[0]
@@ -140,6 +140,6 @@ class crawlMarket(baseCrawl):
         coin.objects.create(coinId=id, image=image, name=name, marketValue=marketValue, price=price,
                             circulation=circulation,crawlfrom=crawlFrom)
 
-# https://block.cc/api/v1/coin/list?page=0&size=100win
+
 
 

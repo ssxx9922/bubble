@@ -60,32 +60,39 @@ class InteractView(View):
 
 class coinOnly(View):
     def get(self,request):
-        pass
-        #TODO
-        # coinId = request.GET.get('coinId')
-        #
-        # if coin.objects.filter(coinId=coinId):
-        #     list = coin.objects.filter(coinId=coinId).order_by('-crawltime')
-        #
-        #     objs = Paginator(list, 1)
-        #     print(objs)
-        #     print(type(objs))
-        #
-        #     dict = {}
-        #     for obj in objs:
-        #         dict = {'id': obj['coinId'],
-        #                 'image': obj['image'],
-        #                 'name': obj['name'],
-        #                 'marketValue': obj['marketValue'],
-        #                 'price': obj['price'],
-        #                 'circulation': obj['circulation'],
-        #                 'crawlfrom': obj['crawlfrom']}
-        #
-        #     return JsonResponse({'code': 'OK',
-        #                          'data': {'item': dict}})
-        # else:
-        #     return JsonResponse({'error': 'ID错误'})
+        coinId = request.GET.get('coinId')
+
+        objs = coin.objects.filter(coinId=coinId)
+
+        if objs:
+            list = objs.order_by('-crawltime')
+
+            dict = {'id': list[0].coinId,
+                    'image': list[0].image,
+                    'name': list[0].name,
+                    'marketValue': list[0].marketValue,
+                    'price': list[0].price,
+                    'circulation': list[0].circulation,
+                    'crawlfrom': list[0].crawlfrom}
+
+            return JsonResponse({'code': 'OK',
+                                 'data': {'item': dict}})
+        else:
+            return JsonResponse({'error': 'ID错误'})
 
 class coinList(View):
     def get(self,request):
-        pass
+        list = coin.objects.values('coinId', 'image', 'name', 'price', 'circulation').order_by('-crawltime')
+        coin_list = Paginator(list, 100)
+
+        dict_list = []
+
+        for item in coin_list.page(1):
+            dict_list.append({'id':item['coinId'],
+                              'image':item['image'],
+                              'name':item['name'],
+                              'price':item['price'],
+                              'circulation': item['circulation']})
+
+        return JsonResponse({'code': 'OK',
+                             'data': {'items': dict_list}})
