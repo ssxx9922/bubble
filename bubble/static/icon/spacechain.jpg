@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Error>
+  <Code>NoSuchKey</Code>
+  <Message>The specified key does not exist.</Message>
+  <RequestId>5AAF37F48D80F8D7960E0C20</RequestId>
+  <HostId>blockchains.oss-cn-shanghai.aliyuncs.com</HostId>
+  <Key>static/coinInfo/spacechain.png</Key>
+</Error>

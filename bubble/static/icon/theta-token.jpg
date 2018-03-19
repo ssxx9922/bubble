@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Error>
+  <Code>NoSuchKey</Code>
+  <Message>The specified key does not exist.</Message>
+  <RequestId>5AAF379C24F757F4C9C222E9</RequestId>
+  <HostId>blockchains.oss-cn-shanghai.aliyuncs.com</HostId>
+  <Key>static/coinInfo/theta-token.png</Key>
+</Error>

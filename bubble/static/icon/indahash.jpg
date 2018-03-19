@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Error>
+  <Code>NoSuchKey</Code>
+  <Message>The specified key does not exist.</Message>
+  <RequestId>5AAF37FE68BBECC4471DE5E5</RequestId>
+  <HostId>blockchains.oss-cn-shanghai.aliyuncs.com</HostId>
+  <Key>static/coinInfo/indahash.png</Key>
+</Error>
