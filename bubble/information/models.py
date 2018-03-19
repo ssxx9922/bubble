@@ -24,14 +24,19 @@ class information(models.Model):
 
 
 class coin(models.Model):
-    coinId = models.CharField(verbose_name='币的ID',max_length=30)
-    image = models.TextField(verbose_name='图片')
-    name = models.CharField(verbose_name='名字',max_length=20)
-    marketValue = models.CharField(verbose_name='市值',max_length=20)
-    price = models.CharField(verbose_name='价格',max_length=20)
-    circulation = models.CharField(verbose_name='成交量',max_length=20)
+    coinId = models.CharField(verbose_name='币的ID',max_length=30,default='')
+    name = models.CharField(verbose_name='名字',max_length=20,default='')
+    symbol = models.CharField(verbose_name='缩写',max_length=10,default='')
+    marketCap = models.CharField(verbose_name='市值',max_length=20,default='')
+    price = models.CharField(verbose_name='价格',max_length=20,default='')
+    volume_ex = models.CharField(verbose_name='成交量',max_length=20,default='')
+
     crawltime = models.DateTimeField(default=datetime.now, verbose_name='爬取时间')
     crawlfrom = models.CharField(max_length=20,verbose_name='来源',default='')
+
+    change1h = models.CharField(max_length=10,verbose_name='1小时涨跌',default='')
+    change1d = models.CharField(max_length=10,verbose_name='1日涨跌',default='')
+    change7d = models.CharField(max_length=10,verbose_name='7日涨跌',default='')
 
     def __str__(self):
         return self.name
@@ -39,3 +44,5 @@ class coin(models.Model):
     class Meta:
         verbose_name = '币行情'
         verbose_name_plural = verbose_name
+
+# https://block.cc/api/v1/coin/list?page=0&size=100

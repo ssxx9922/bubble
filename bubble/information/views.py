@@ -68,12 +68,15 @@ class coinOnly(View):
             list = objs.order_by('-crawltime')
 
             dict = {'id': list[0].coinId,
-                    'image': list[0].image,
                     'name': list[0].name,
-                    'marketValue': list[0].marketValue,
+                    'symbol': list[0].symbol,
+                    'marketCap': list[0].marketCap,
                     'price': list[0].price,
-                    'circulation': list[0].circulation,
-                    'crawlfrom': list[0].crawlfrom}
+                    'volume_ex': list[0].volume_ex,
+                    'crawlfrom': list[0].crawlfrom,
+                    'change1h': list[0].change1h,
+                    'change1d': list[0].change1d,
+                    'change7d': list[0].change7d,}
 
             return JsonResponse({'code': 'OK',
                                  'data': {'item': dict}})
@@ -82,17 +85,17 @@ class coinOnly(View):
 
 class coinList(View):
     def get(self,request):
-        list = coin.objects.values('coinId', 'image', 'name', 'price', 'circulation').order_by('-crawltime')
+        list = coin.objects.values('coinId', 'symbol', 'name', 'price').order_by('-crawltime')
         coin_list = Paginator(list, 100)
 
         dict_list = []
 
         for item in coin_list.page(1):
             dict_list.append({'id':item['coinId'],
-                              'image':item['image'],
+                              'symbol':item['symbol'],
                               'name':item['name'],
-                              'price':item['price'],
-                              'circulation': item['circulation']})
+                              'price':item['price']})
+
 
         return JsonResponse({'code': 'OK',
                              'data': {'items': dict_list}})

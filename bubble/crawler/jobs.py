@@ -17,7 +17,7 @@ def crawlInfoJob():
 
 def crawlCoinJob():
     crawlObj = crawlMarket()
-    crawlObj.crawlerFeixiaohao()
+    crawlObj.crawlerClockCC()
 
 
 def reportJob():

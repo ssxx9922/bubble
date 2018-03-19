@@ -9,6 +9,7 @@ from django.views import View
 from information.models import information,coin
 from crawler.models import crawlState
 from lxml import etree
+import re
 
 class CrawlerInfoView(View):
     def get(self,request):
@@ -27,7 +28,7 @@ class CrawlerCoinView(View):
     def get(self,request):
         try:
             crawlObj = crawlMarket()
-            crawlObj.crawlerFeixiaohao()
+            crawlObj.crawlerClockCC()
         except Exception as e:
             return JsonResponse({'error':e})
         else:
@@ -117,8 +118,13 @@ class crawlInfo(baseCrawl):
         if information.objects.filter(infoid=infoid):
             pass
         else:
-            information.objects.create(info=info, infoid=infoid, infotime=infotime, author=author)
+            information.objects.create(info=self.infoToRe(info), infoid=infoid, infotime=infotime, author=author)
 
+    def infoToRe(self,info):
+        info = re.sub('\n', '', info)
+        info = re.sub('\[查看原文\]', '', info)
+        infore = re.match('^【.*?】', info)
+        return info if infore != None else '【快讯】' + info
 
 class crawlMarket(baseCrawl):
     def crawlerFeixiaohao(self):
@@ -128,17 +134,36 @@ class crawlMarket(baseCrawl):
         tbody = html.xpath('//*[@id="table"]/tbody/tr')
         for item in tbody:
             id = item.xpath('@id')[0]
-            image = 'http:' + item.xpath('td[2]/a/img/@src')[0]
             name = item.xpath('td[2]/a/img/@alt')[0]
             marketValue = item.xpath('td[3]/text()')[0]
             price = item.xpath('td[4]/a/text()')[0]
             circulation = item.xpath('td[5]/text()')[0]
-            self.saveObj(id,image,name,marketValue,price,circulation,'FXH')
+            self.saveObj(id,name,name,price,circulation,marketValue,'','','','FXH')
+
+    def crawlerClockCC(self):
+        response = self.getData('http://block.cc/api/v1/coin/list?page=0&size=100')
+        result = json.loads(response.text)
+        for item in result['data']['list']:
+            coinId = item['id']
+            eName = item['name']
+            name = item['zhName']
+            symbol = item['symbol']
+            price = item['price']
+            volume_ex = item['volume_ex']
+            marketCap = item['marketCap']
+
+            change1h = item['change1h']
+            change1d = item['change1d']
+            change7d = item['change7d']
+
+            name = name if name != '' else eName
+
+            self.saveObj(coinId,name,symbol,price,volume_ex,marketCap,change1h,change1d,change7d,'BLOCK')
 
 
-    def saveObj(self,id,image,name,marketValue,price,circulation,crawlFrom):
-        coin.objects.create(coinId=id, image=image, name=name, marketValue=marketValue, price=price,
-                            circulation=circulation,crawlfrom=crawlFrom)
+    def saveObj(self,coinId,name,symbol,price,volume_ex,marketCap,change1h='',change1d='',change7d='',crawlfrom=''):
+        coin.objects.create(coinId=coinId, name=name, symbol=symbol, price=price, volume_ex=volume_ex,
+                            marketCap=marketCap,change1h=change1h,change1d=change1d,change7d=change7d,crawlfrom=crawlfrom)
 
 
 
