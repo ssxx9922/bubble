@@ -21,6 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('info/', include('information.urls')),
     path('crawler/',include('crawler.urls')),
-    path('wechat/', include('wechatmp.urls')),
     path('', TemplateView.as_view(template_name='index.html'))
 ]
