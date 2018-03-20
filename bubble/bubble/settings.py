@@ -145,5 +145,5 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 CRONJOBS = [
     ('*/12 * * * *', 'crawler.jobs.crawlInfoJob'),
     ('*/5 * * * *', 'crawler.jobs.crawlCoinJob'),
-    ('30 08 * * * *', 'crawler.jobs.reportJob')
+    ('30 08 * * *', 'crawler.jobs.reportJob')
 ]
