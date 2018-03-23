@@ -37,7 +37,7 @@ class CrawlerCoinView(View):
 
 class baseCrawl(object):
     def crawlState(self,name,isSuccess,note,time):
-        state = 'success'if isSuccess == True else 'success'
+        state = 'success' if isSuccess == True else 'failure'
         crawlState.objects.create(target=name, state=state, note=note, completetime=time)
 
     def getData(self,url):
@@ -123,6 +123,7 @@ class crawlInfo(baseCrawl):
     def infoToRe(self,info):
         info = re.sub('\n', '', info)
         info = re.sub('\[查看原文\]', '', info)
+        info = re.sub('\.\.\.', '', info)
         infore = re.match('^【.*?】', info)
         return info if infore != None else '【快讯】' + info
 
