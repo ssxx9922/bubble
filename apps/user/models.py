@@ -2,7 +2,6 @@ from django.db import models
 
 # Create your models here.
 
-from datetime import datetime
 from django.contrib.auth.models import AbstractUser
 
 class UserProfile(AbstractUser):
