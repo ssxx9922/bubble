@@ -1,6 +1,8 @@
 from datetime import datetime
 import time
 import json
+from xml import etree
+
 import requests
 
 from django.http import JsonResponse
@@ -8,7 +10,7 @@ from bs4 import BeautifulSoup as bs
 from django.views import View
 from information.models import information,coin
 from crawler.models import crawlState
-from lxml import etree
+
 import re
 
 class CrawlerInfoView(View):
@@ -144,27 +146,35 @@ class crawlMarket(baseCrawl):
     def crawlerClockCC(self):
         response = self.getData('http://block.cc/api/v1/coin/list?page=0&size=100')
         result = json.loads(response.text)
-        for item in result['data']['list']:
-            coinId = item['id']
-            eName = item['name']
-            name = item['zhName']
-            symbol = item['symbol']
-            price = item['price']
-            volume_ex = item['volume_ex']
-            marketCap = item['marketCap']
 
-            change1h = item['change1h']
-            change1d = item['change1d']
-            change7d = item['change7d']
+        if len(result['data']['list']) != 100:
+            return
 
-            name = name if name != '' else eName
+        save_list = []
 
-            self.saveObj(coinId,name,symbol,price,volume_ex,marketCap,change1h,change1d,change7d,'BLOCK')
+        for i,item in enumerate(result['data']['list']):
+            noNum = i
+            coinId = item.get('id')
+            eName = item.get('name')
+            name = item.get('zhName')
+            symbol = item.get('symbol')
+            price = item.get('price')
+            volume_ex = item.get('volume_ex')
+            marketCap = item.get('marketCap')
 
+            change1h = item.get('change1h')
+            change1d = item.get('change1d')
+            change7d = item.get('change7d')
 
-    def saveObj(self,coinId,name,symbol,price,volume_ex,marketCap,change1h='',change1d='',change7d='',crawlfrom=''):
-        coin.objects.create(coinId=coinId, name=name, symbol=symbol, price=price, volume_ex=volume_ex,
-                            marketCap=marketCap,change1h=change1h,change1d=change1d,change7d=change7d,crawlfrom=crawlfrom)
+            if name == None or name == '':
+                name = eName
+
+            new_coin = coin(coinId=coinId, name=name, symbol=symbol, price=price, volume_ex=volume_ex,
+                            marketCap=marketCap,change1h=change1h,change1d=change1d,change7d=change7d,no=noNum,crawlfrom='BLOCK')
+
+            save_list.append(new_coin)
+
+        coin.objects.bulk_create(save_list)
 
 
 

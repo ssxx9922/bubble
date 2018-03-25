@@ -85,17 +85,24 @@ class coinOnly(View):
 
 class coinList(View):
     def get(self,request):
-        list = coin.objects.values('coinId', 'symbol', 'name', 'price').order_by('-crawltime')
+
+        list = coin.objects.values('coinId', 'symbol', 'name', 'price', 'change1d', 'no').order_by('-crawltime')
         coin_list = Paginator(list, 100)
 
         dict_list = []
 
+        imgUrl = 'https://www.bibibi.kim/static/icon/{coinId}.jpg'
+
         for item in coin_list.page(1):
             dict_list.append({'id':item['coinId'],
+                              'no':item['no'],
                               'symbol':item['symbol'],
                               'name':item['name'],
-                              'price':item['price']})
+                              'price':item['price'],
+                              'change':item['change1d'],
+                              'iamgeUrl':imgUrl.format(coinId=item['coinId'])})
 
+        dict_list.sort(key=lambda d:d['no'])
 
         return JsonResponse({'code': 'OK',
                              'data': {'items': dict_list}})
