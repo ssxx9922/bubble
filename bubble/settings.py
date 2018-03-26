@@ -26,6 +26,8 @@ SECRET_KEY = 'd4)7#4dle%4^u5^giuq#2wdm32i2y0@@k^1pe32$t6cgt$3twe'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+REQUEST_URL = 'http://www.bibibi.kim' if DEBUG == False else'http://127.0.0.1:8000'
+
 ALLOWED_HOSTS = []
 
 
@@ -41,7 +43,9 @@ INSTALLED_APPS = [
     'django_crontab',
     'information',
     'crawler',
+    'user'
 ]
+AUTH_USER_MODEL = 'user.UserProfile'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -124,7 +128,7 @@ USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
-
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),

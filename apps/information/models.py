@@ -40,7 +40,7 @@ class coin(models.Model):
     change7d = models.CharField(max_length=10,verbose_name='7日涨跌',default='')
 
     def __str__(self):
-        return self.name
+        return '[{no}]{name}-({time})'.format(no=self.no,name=self.name,time=self.crawltime)
 
     class Meta:
         verbose_name = '币行情'
