@@ -27,13 +27,13 @@ def send_register_email(email, send_type='register'):
 
     if send_type == 'register':
         email_title = '注册激活链接'
-        email_body = '点击下面的链接激活你的账号：{0}/active/{1}'.format(REQUEST_URL,code)
+        email_body = '点击下面的链接激活你的账号：{0}/user/active/{1}\n(30分钟内有效)'.format(REQUEST_URL,code)
         send_status = send_mail(email_title, email_body, EMAIL_HOST_USER, [email])
         if send_status:
             pass
     elif send_type == 'forget':
         email_title = '重置密码'
-        email_body = '点击下面的链接重置密码：{0}/reset/{1}'.format(REQUEST_URL,code)
+        email_body = '点击下面的链接重置密码：{0}/user/reset/{1}\n(30分钟内有效)'.format(REQUEST_URL,code)
         send_status = send_mail(email_title, email_body, EMAIL_HOST_USER, [email])
         if send_status:
             pass
