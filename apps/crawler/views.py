@@ -1,26 +1,23 @@
 from datetime import datetime
-import time
-import json
 from xml import etree
-
-import requests
-
 from django.http import JsonResponse
 from bs4 import BeautifulSoup as bs
 from django.views import View
-from information.models import information,coin
+from information.models import information
+from information.models import coin
 from crawler.models import crawlState
 
 import re
+import requests
+import time
+import json
+import threading
 
 class CrawlerInfoView(View):
     def get(self,request):
         try:
             crawlObj = crawlInfo()
-            crawlObj.crawlerBshijie()
-            crawlObj.crawlerJinse()
-            crawlObj.crawlerWallstreetcn()
-            crawlObj.crawlerBiknow()
+            crawlObj.crawler_run()
         except Exception as e:
             return JsonResponse({'error':e})
         else:
@@ -42,22 +39,17 @@ class baseCrawl(object):
         state = 'success' if isSuccess == True else 'failure'
         crawlState.objects.create(target=name, state=state, note=note, completetime=time)
 
-    def getData(self,url):
+    def get_data(self,url,cookies=None):
         try:
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}
-            start = time.clock()
-            response = requests.get(url, headers=headers,timeout=10)
-            end = time.clock()
+            response = requests.get(url, headers=headers,timeout=10,cookies=cookies)
             if response.status_code == 200:
-                self.crawlState(url, True, str(response.status_code), '%f' %(end - start))
                 return response
             else:
-                self.crawlState(url, False, str(response.status_code),'')
                 return None
         except Exception as e:
             print('Crawling Failed', url)
-            self.crawlState(url,False,e)
             return None
 
     def afterInfoTime(self,infotime):
@@ -72,51 +64,69 @@ class baseCrawl(object):
 
 
 class crawlInfo(baseCrawl):
-    def crawlerBshijie(self):
-        response = self.getData('http://www.bishijie.com/api/news')
-        result = json.loads(response.text)
-        for date in dict(result['data']).keys():
-            list = result['data'][date]['buttom']
-            for r in list:
-                info = r['content'].strip()
-                infoid = 'BSJ-' + str(r['newsflash_id'])
-                infotime = datetime.fromtimestamp(r['issue_time'])
-                self.saveObj(info, infoid, infotime, 'bishijie')
+    def crawler_run(self):
+        t1 = threading.Thread(target=self.crawler_bshijie)
+        t2 = threading.Thread(target=self.crawler_jinse)
+        t3 = threading.Thread(target=self.crawler_wallstreetcn)
+        t4 = threading.Thread(target=self.crawler_biknow)
+        t1.start()
+        t2.start()
+        t3.start()
+        t4.start()
+        t1.join()
+        t2.join()
+        t3.join()
+        t4.join()
 
-    def crawlerJinse(self):
-        response = self.getData('http://www.jinse.com/lives')
-        result = bs(response.text, 'lxml').find_all('li', class_='clearfix ')
-        date_id = bs(response.text, 'lxml').find('ul', class_='lost').get('id')
-        date = datetime.now().strftime('%Y-%m-%d ')
-        for r in result:
-            infoid = '' + date_id[5:] + '-' + r.get('data-id').strip()
-            time = date + r.find('p', class_='live-time').get_text().strip() + ':00'
-            infotime = self.afterInfoTime(time)
-            info = r.find('div', class_='live-info').get_text().strip()
-            self.saveObj(info,infoid,infotime,'jinse')
+    def crawler_bshijie(self):
+        response = self.get_data('http://www.bishijie.com/api/news')
+        if response:
+            result = json.loads(response.text)
+            for date in dict(result['data']).keys():
+                list = result['data'][date]['buttom']
+                for r in list:
+                    info = r['content'].strip()
+                    infoid = 'BSJ-' + str(r['newsflash_id'])
+                    infotime = datetime.fromtimestamp(r['issue_time'])
+                    self.save_obj(info, infoid, infotime, 'bishijie')
 
-    def crawlerWallstreetcn(self):
-        response = self.getData('http://api-prod.wallstreetcn.com/apiv1/content/lives/pc?limit=20')
-        result = json.loads(response.text)
-        for item in result['data']['blockchain']['items']:
-            infoid = 'HRJ' + str(item['id'])
-            infotime = datetime.fromtimestamp(item['display_time'])
-            info = item['content_text'].strip()
-            self.saveObj(info,infoid,infotime,'wallstreetcn')
+    def crawler_jinse(self):
+        response_home = self.get_data('http://www.jinse.com/lives')
+        response = self.get_data('http://api.jinse.com/v4/live/list?limit=20', response_home.cookies)
+        if response:
+            result = json.loads(response.text)
+            for r in result['list']:
+                for item in r['lives']:
+                    info_id = 'JS-' + str(item['id'])
+                    info_time = datetime.fromtimestamp(item['created_at'])
+                    info = item['content']
+                    self.save_obj(info,info_id,info_time,'jinse')
 
-    def crawlerBiknow(self):
-        response = self.getData('http://www.biknow.com')
-        response.encoding = 'utf-8'
-        result = bs(response.text, 'lxml').find('ul', id='jiazai')
-        date = datetime.now().strftime('%Y-%m-%d ')
-        for item in result.find_all('li'):
-            infoid = 'BZD-' + item.find('p', class_='kuaixunconr').find('a').get('href')[17:]
-            time = date + item.find('p', class_='kuaixunconl').get_text().strip() + ':00'
-            infotime = self.afterInfoTime(time)
-            info = item.find('p', class_='kuaixunconr').find('a').get_text().strip()
-            self.saveObj(info, infoid, infotime, 'biknow')
+    def crawler_wallstreetcn(self):
+        response = self.get_data('http://api-prod.wallstreetcn.com/apiv1/content/lives/pc?limit=20')
+        if response:
+            result = json.loads(response.text)
+            for item in result['data']['blockchain']['items']:
+                infoid = 'HRJ' + str(item['id'])
+                info_time = datetime.fromtimestamp(item['display_time'])
+                info = item['content_text'].strip()
+                self.save_obj(info,infoid,info_time,'wallstreetcn')
 
-    def saveObj(self, info, infoid, infotime, author):
+
+    def crawler_biknow(self):
+        response = self.get_data('http://www.biknow.com')
+        if response:
+            response.encoding = 'utf-8'
+            result = bs(response.text, 'lxml').find('ul', id='jiazai')
+            date = datetime.now().strftime('%Y-%m-%d ')
+            for item in result.find_all('li'):
+                infoid = 'BZD-' + item.find('p', class_='kuaixunconr').find('a').get('href')[17:]
+                crawl_time = date + item.find('p', class_='kuaixunconl').get_text().strip() + ':00'
+                info_time = self.afterInfoTime(crawl_time)
+                info = item.find('p', class_='kuaixunconr').find('a').get_text().strip()
+                self.save_obj(info, infoid, info_time, 'biknow')
+
+    def save_obj(self, info, infoid, infotime, author):
         if information.objects.filter(infoid=infoid):
             pass
         else:
@@ -126,12 +136,13 @@ class crawlInfo(baseCrawl):
         info = re.sub('\n', '', info)
         info = re.sub('\[查看原文\]', '', info)
         info = re.sub('\.\.\.', '', info)
+        info = re.sub('【消息来源:biknow.com】','',info)
         infore = re.match('^【.*?】', info)
         return info if infore != None else '【快讯】' + info
 
 class crawlMarket(baseCrawl):
     def crawlerFeixiaohao(self):
-        response = self.getData('http://www.feixiaohao.com')
+        response = self.get_data('http://www.feixiaohao.com')
 
         html = etree.HTML(response.text)
         tbody = html.xpath('//*[@id="table"]/tbody/tr')
@@ -141,10 +152,10 @@ class crawlMarket(baseCrawl):
             marketValue = item.xpath('td[3]/text()')[0]
             price = item.xpath('td[4]/a/text()')[0]
             circulation = item.xpath('td[5]/text()')[0]
-            self.saveObj(id,name,name,price,circulation,marketValue,'','','','FXH')
+            self.save_obj(id,name,name,price,circulation,marketValue,'','','','FXH')
 
     def crawlerClockCC(self):
-        response = self.getData('http://block.cc/api/v1/coin/list?page=0&size=100')
+        response = self.get_data('http://block.cc/api/v1/coin/list?page=0&size=100')
         result = json.loads(response.text)
 
         if len(result['data']['list']) != 100:

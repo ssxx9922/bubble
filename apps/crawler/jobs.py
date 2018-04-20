@@ -10,10 +10,7 @@ from django.core.mail import send_mail
 
 def crawlInfoJob():
     crawlObj = crawlInfo()
-    crawlObj.crawlerBshijie()
-    crawlObj.crawlerJinse()
-    crawlObj.crawlerWallstreetcn()
-    crawlObj.crawlerBiknow()
+    crawlObj.crawler_run()
 
 def crawlCoinJob():
     crawlObj = crawlMarket()
