@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'django_crontab',
     'information',
     'crawler',
-    'user'
+    'user',
+    'rest_framework',
 ]
 AUTH_USER_MODEL = 'user.UserProfile'
 
@@ -134,15 +135,19 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
 
+# media
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+
 # send_email
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 EMAIL_USE_SSL = True
-EMAIL_HOST = 'smtp.163.com'
+EMAIL_HOST = 'smtp.mxhichina.com'
 EMAIL_PORT = 465
-EMAIL_HOST_USER = 'ssxx9922@163.com' # 帐号
-EMAIL_HOST_PASSWORD = 'sxYL19920316'  # 密码
+EMAIL_HOST_USER = 'admin@bibibi.kim' # 帐号
+EMAIL_HOST_PASSWORD = 'cJZdQCtJTpc6'  # 密码
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # 定时任务
@@ -151,3 +156,11 @@ CRONJOBS = [
     ('*/5 * * * *', 'apps.crawler.jobs.crawlCoinJob'),
     ('30 08 * * *', 'apps.crawler.jobs.reportJob')
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication'
+    ),
+}

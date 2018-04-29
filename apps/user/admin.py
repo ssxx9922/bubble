@@ -11,7 +11,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 admin.site.register(UserProfile,UserProfileAdmin)
 
 class EmailVerifyRecordAdmin(admin.ModelAdmin):
-    list_display = ('email', 'code', 'send_code', 'send_code')
+    list_display = ('email', 'code', 'send_type')
     # search_fields = ('email', 'code', 'send_code', 'send_code')
 
 admin.site.register(EmailVerifyRecord,EmailVerifyRecordAdmin)

@@ -22,7 +22,7 @@ def send_register_email(email, send_type='register'):
     code = random_str(16)
     email_record.code = code
     email_record.email = email
-    email_record.send_code = send_type
+    email_record.send_type = send_type
     email_record.save()
 
     if send_type == 'register':

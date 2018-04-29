@@ -22,5 +22,6 @@ urlpatterns = [
     path('info/', include('information.urls')),
     path('crawler/',include('crawler.urls')),
     path('user/',include('user.urls')),
-    path('', TemplateView.as_view(template_name='index.html'))
+    path('', TemplateView.as_view(template_name='index.html')),
+    path('registerSuccess',TemplateView.as_view(template_name='index.html'))
 ]

@@ -18,7 +18,7 @@ class CrawlerInfoView(View):
         try:
             crawlObj = crawlInfo()
             crawlObj.crawlerBshijie()
-            crawlObj.crawlerJinse()
+            # crawlObj.crawlerJinse()
             crawlObj.crawlerWallstreetcn()
             crawlObj.crawlerBiknow()
         except Exception as e:
