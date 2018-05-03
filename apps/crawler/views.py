@@ -18,6 +18,7 @@ class CrawlerInfoView(View):
         try:
             crawlObj = crawlInfo()
             crawlObj.crawler_run()
+
         except Exception as e:
             return JsonResponse({'error':e})
         else:

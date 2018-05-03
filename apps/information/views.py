@@ -5,6 +5,7 @@ from django.views import View
 
 from information.models import information,coin
 # Create your views here.
+from apiData.result import Result
 
 
 class ListView(View):
@@ -19,9 +20,9 @@ class ListView(View):
         try:
             contacts = info_list.page(page)
         except PageNotAnInteger:
-            return JsonResponse({'error':'服务器出了问题'})
+            return Result.error(message='服务器出现了问题')
         except EmptyPage:
-            return JsonResponse({'error':'没用更多数据了'})
+            return Result.error(message='没用更多数据了')
 
         dict_list = []
 
@@ -33,9 +34,8 @@ class ListView(View):
                               'author': item['author'],
                               'time':item['infotime'].strftime('%Y-%m-%d %H:%M')})
 
-        return JsonResponse({'code':'OK',
-                             'data':{'page':info_list.num_pages,
-                                     'list':dict_list}})
+        return Result.success({'page':info_list.num_pages,
+                               'list':dict_list})
 
 class InteractView(View):
     def get(self,request):

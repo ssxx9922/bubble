@@ -26,6 +26,8 @@ SECRET_KEY = 'd4)7#4dle%4^u5^giuq#2wdm32i2y0@@k^1pe32$t6cgt$3twe'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+REQUEST_URL = 'http://www.bibibi.kim' if DEBUG == False else'http://127.0.0.1:8000'
+
 ALLOWED_HOSTS = []
 
 
@@ -41,7 +43,10 @@ INSTALLED_APPS = [
     'django_crontab',
     'information',
     'crawler',
+    'user',
+    'rest_framework',
 ]
+AUTH_USER_MODEL = 'user.UserProfile'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -124,21 +129,25 @@ USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
-
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
+
+# media
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 
 # send_email
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 EMAIL_USE_SSL = True
-EMAIL_HOST = 'smtp.163.com'
+EMAIL_HOST = 'smtp.mxhichina.com'
 EMAIL_PORT = 465
-EMAIL_HOST_USER = 'ssxx9922@163.com' # 帐号
-EMAIL_HOST_PASSWORD = 'sxYL19920316'  # 密码
+EMAIL_HOST_USER = 'admin@bibibi.kim' # 帐号
+EMAIL_HOST_PASSWORD = 'cJZdQCtJTpc6'  # 密码
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # 定时任务
@@ -147,3 +156,11 @@ CRONJOBS = [
     ('*/5 * * * *', 'apps.crawler.jobs.crawlCoinJob'),
     ('30 08 * * *', 'apps.crawler.jobs.reportJob')
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication'
+    ),
+}
