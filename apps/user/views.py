@@ -1,6 +1,10 @@
 
 # Create your views here.
 from datetime import datetime, timedelta
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.backends import ModelBackend
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import View
@@ -9,6 +13,19 @@ from apiData.result import Result
 from user.models import UserProfile, EmailVerifyRecord
 from utils.email_send import send_register_email
 
+User = get_user_model()
+
+class CustomBackend(ModelBackend):
+    """
+    自定义用户验证
+    """
+    def authenticate(self, username=None, password=None, **kwargs):
+        try:
+            user = User.objects.get(Q(username=username)|Q(email=username))
+            if user.check_password(password):
+                return user
+        except Exception as e:
+            return None
 
 # 注册
 class registerEmailView(View):
