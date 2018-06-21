@@ -28,7 +28,7 @@ DEBUG = True
 
 REQUEST_URL = 'http://www.bibibi.kim' if DEBUG == False else'http://127.0.0.1:8000'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['www.bibibi.kim','127.0.0.1','localhost']
 
 
 # Application definition
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'crawler',
     'user',
     'rest_framework',
+    'corsheaders'
 ]
 AUTH_USER_MODEL = 'user.UserProfile'
 AUTHENTICATION_BACKENDS = (
@@ -54,6 +55,7 @@ AUTHENTICATION_BACKENDS = (
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -151,7 +153,8 @@ EMAIL_HOST = 'smtp.mxhichina.com'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'admin@bibibi.kim' # 帐号
 EMAIL_HOST_PASSWORD = 'cJZdQCtJTpc6'  # 密码
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = '币币币<admin@bibibi.kim>'
+EMAIL_FROM = '币币币<admin@bibibi.kim>'
 
 # 定时任务
 CRONJOBS = [

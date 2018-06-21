@@ -8,10 +8,17 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import View
+
+from rest_framework.mixins import CreateModelMixin
+from rest_framework import viewsets
+from rest_framework import status
 # 登录
+from rest_framework.response import Response
+
 from apiData.result import Result
 from user.models import UserProfile, EmailVerifyRecord
 from utils.email_send import send_register_email
+from user.serializers import CodeSerializer
 
 User = get_user_model()
 
@@ -26,6 +33,33 @@ class CustomBackend(ModelBackend):
                 return user
         except Exception as e:
             return None
+
+class registerEmailCodeViewset(CreateModelMixin,viewsets.GenericViewSet):
+    """
+    发送验证邮件
+    """
+    serializer_class = CodeSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validate_email['username']
+        user_profile = UserProfile.objects.create_user(email, email, pass_word)
+        user_profile.is_active = False
+        user_profile.save()
+        send_register_email(email=email, send_type='register')
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+class UserViewset(CreateModelMixin, viewsets.GenericViewSet):
+    """
+    用户
+    """
+
+
 
 # 注册
 class registerEmailView(View):

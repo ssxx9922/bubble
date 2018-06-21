@@ -100,7 +100,7 @@ class coinList(View):
                               'name':item['name'],
                               'price':item['price'],
                               'change':item['change1d'],
-                              'iamgeUrl':imgUrl.format(coinId=item['coinId'])})
+                              'imageUrl':imgUrl.format(coinId=item['coinId'])})
 
         dict_list.sort(key=lambda d:d['no'])
 
