@@ -91,7 +91,8 @@ class coinList(View):
 
         dict_list = []
 
-        imgUrl = 'https://www.bibibi.kim/static/icon/{coinId}.jpg'
+        # imgUrl = 'https://www.bibibi.kim/static/icon/{coinId}.jpg'
+        imgUrl = 'https://blockchains.oss-cn-shanghai.aliyuncs.com/static/coinInfo/{coinId}.png'
 
         for item in coin_list.page(1):
             dict_list.append({'id':item['coinId'],
@@ -100,7 +101,7 @@ class coinList(View):
                               'name':item['name'],
                               'price':item['price'],
                               'change':item['change1d'],
-                              'iamgeUrl':imgUrl.format(coinId=item['coinId'])})
+                              'imageUrl':imgUrl.format(coinId=item['coinId'])})
 
         dict_list.sort(key=lambda d:d['no'])
 
