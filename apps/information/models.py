@@ -26,7 +26,7 @@ class information(models.Model):
 class coin(models.Model):
     no = models.IntegerField(verbose_name='排名',default=0)
     coinId = models.CharField(verbose_name='币的ID',max_length=30,default='')
-    name = models.CharField(verbose_name='名字',max_length=20,default='')
+    name = models.CharField(verbose_name='名字',max_length=40,default='')
     symbol = models.CharField(verbose_name='缩写',max_length=10,default='')
     marketCap = models.CharField(verbose_name='市值',max_length=20,default='')
     price = models.CharField(verbose_name='价格',max_length=20,default='')

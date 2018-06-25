@@ -91,7 +91,8 @@ class coinList(View):
 
         dict_list = []
 
-        imgUrl = 'https://www.bibibi.kim/static/icon/{coinId}.jpg'
+        # imgUrl = 'https://www.bibibi.kim/static/icon/{coinId}.jpg'
+        imgUrl = 'https://blockchains.oss-cn-shanghai.aliyuncs.com/static/coinInfo/{coinId}.png'
 
         for item in coin_list.page(1):
             dict_list.append({'id':item['coinId'],
