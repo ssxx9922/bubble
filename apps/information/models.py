@@ -45,5 +45,3 @@ class coin(models.Model):
     class Meta:
         verbose_name = '币行情'
         verbose_name_plural = verbose_name
-
-# https://block.cc/api/v1/coin/list?page=0&size=100
