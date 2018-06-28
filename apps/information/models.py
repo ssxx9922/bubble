@@ -8,7 +8,7 @@ from django.db import models
 
 class information(models.Model):
     info = models.TextField(verbose_name='信息')
-    author = models.URLField(default='',verbose_name='来源',max_length=50)
+    author = models.CharField(default='',verbose_name='来源',max_length=50)
     infotime = models.DateTimeField(default=datetime.now,verbose_name='加入时间')
     crawltime = models.DateTimeField(default=datetime.now, verbose_name='爬取时间')
     infoid = models.CharField(max_length=30, verbose_name='信息ID')
@@ -27,7 +27,7 @@ class coin(models.Model):
     no = models.IntegerField(verbose_name='排名',default=0)
     coinId = models.CharField(verbose_name='币的ID',max_length=30,default='')
     name = models.CharField(verbose_name='名字',max_length=40,default='')
-    symbol = models.CharField(verbose_name='缩写',max_length=10,default='')
+    symbol = models.CharField(verbose_name='缩写',max_length=40,default='')
     marketCap = models.CharField(verbose_name='市值',max_length=20,default='')
     price = models.CharField(verbose_name='价格',max_length=20,default='')
     volume_ex = models.CharField(verbose_name='成交量',max_length=20,default='')

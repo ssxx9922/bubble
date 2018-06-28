@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     'crawler',
     'user',
     'rest_framework',
-    'corsheaders'
+    'corsheaders',
+    'xadmin',
+    'crispy_forms'
 ]
 AUTH_USER_MODEL = 'user.UserProfile'
 AUTHENTICATION_BACKENDS = (
