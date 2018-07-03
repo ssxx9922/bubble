@@ -25,11 +25,11 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 SECRET_KEY = 'd4)7#4dle%4^u5^giuq#2wdm32i2y0@@k^1pe32$t6cgt$3twe'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 REQUEST_URL = 'http://www.bibibi.kim' if DEBUG == False else'http://127.0.0.1:8000'
 
-ALLOWED_HOSTS = ['www.bibibi.kim','127.0.0.1','localhost']
+ALLOWED_HOSTS = ['www.bibibi.kim']
 
 
 # Application definition
